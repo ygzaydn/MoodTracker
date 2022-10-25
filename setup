@@ -1,0 +1,5 @@
+ ./gradlew clean 
+
+npm start on project
+open android studio on /android file, and start virtual
+npm run android on project

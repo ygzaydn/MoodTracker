@@ -1,14 +1,30 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  LayoutAnimation,
+} from 'react-native';
 import format from 'date-fns/format';
 import { MoodOptionWithTimestamp } from '../types';
 import { theme } from '../theme';
+import { useAppContext } from '../App.provider';
 
 type MoodItemRowProps = {
   item: MoodOptionWithTimestamp;
 };
 
 export const MoodItemRow: React.FC<MoodItemRowProps> = ({ item }) => {
+  const appContext = useAppContext();
+
+  const handlePress = React.useCallback(() => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    if (appContext?.deleteMood) {
+      appContext.deleteMood(item);
+    }
+  }, [appContext, item]);
+
   return (
     <View style={styles.moodItem}>
       <View style={styles.iconAndDescription}>
@@ -18,6 +34,9 @@ export const MoodItemRow: React.FC<MoodItemRowProps> = ({ item }) => {
       <Text style={styles.moodDate}>
         {format(new Date(item.timestamp), "dd MMM, yyyy 'at' h:mmaaa")}
       </Text>
+      <Pressable hitSlop={16} onPress={() => handlePress()}>
+        <Text style={styles.deleteText}>Delete</Text>
+      </Pressable>
     </View>
   );
 };
@@ -27,13 +46,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 40,
     marginRight: 10,
+    fontFamily: theme.fontFamilyBold,
   },
   moodDate: {
     textAlign: 'center',
     color: theme.colorLavender,
+    fontFamily: theme.fontFamilyRegular,
   },
   moodItem: {
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(0,0,0,0.1)',
     marginBottom: 10,
     padding: 10,
     flexDirection: 'row',
@@ -43,10 +64,14 @@ const styles = StyleSheet.create({
   moodDescription: {
     fontSize: 18,
     color: theme.colorPurple,
-    fontWeight: 'bold',
+    fontFamily: theme.fontFamilyBold,
   },
   iconAndDescription: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  deleteText: {
+    color: theme.colorBlue,
+    fontFamily: theme.fontFamilyLight,
   },
 });

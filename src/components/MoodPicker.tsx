@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { MoodOptionType } from '../types';
+import { theme } from '../theme';
+
+import Reanimated, {
+  useAnimatedStyle,
+  withTiming,
+} from 'react-native-reanimated';
+
+const ReanimatedPressable = Reanimated.createAnimatedComponent(Pressable);
+
+const imageSrc = require('../assets/butterflies.png');
 
 const moodOptions: MoodOptionType[] = [
   { emoji: '🧑‍💻', description: 'studious' },
@@ -16,13 +26,34 @@ type MoodPickerProps = {
 
 export const MoodPicker = ({ onSelect }: MoodPickerProps) => {
   const [selectedMood, setSelectedMood] = useState<MoodOptionType>();
+  const [hasSelected, setHasSelected] = useState(false);
 
   const handleSelect = React.useCallback(() => {
     if (selectedMood) {
       onSelect(selectedMood);
       setSelectedMood(undefined);
+      setHasSelected(true);
     }
   }, [onSelect, selectedMood]);
+
+  const buttonStyle = useAnimatedStyle(
+    () => ({
+      opacity: selectedMood ? withTiming(1) : withTiming(0.5),
+      transform: [{ scale: selectedMood ? withTiming(1) : 0.8 }],
+    }),
+    [selectedMood],
+  );
+
+  if (hasSelected) {
+    return (
+      <View style={styles.container}>
+        <Image source={imageSrc} style={styles.image} />
+        <Pressable style={styles.button} onPress={() => setHasSelected(false)}>
+          <Text style={styles.buttonText}>Back</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.moodContainer}>
@@ -46,28 +77,45 @@ export const MoodPicker = ({ onSelect }: MoodPickerProps) => {
           </View>
         ))}
       </View>
-      <Pressable style={styles.button} onPress={handleSelect}>
+      <ReanimatedPressable
+        style={[styles.button, buttonStyle]}
+        onPress={handleSelect}>
         <Text style={styles.buttonText}>Choose</Text>
-      </Pressable>
+      </ReanimatedPressable>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    borderWidth: 2,
+    margin: 10,
+    borderRadius: 20,
+    padding: 20,
+    justifyContent: 'space-between',
+    height: 250,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+  },
+  image: {
+    alignSelf: 'center',
+  },
   moodContainer: {
     margin: 20,
     borderWidth: 1.5,
     borderRadius: 5,
+    height: 250,
+    backgroundColor: 'rgba(0,0,0,0.2)',
   },
   moodTitle: {
     textAlign: 'center',
     fontSize: 25,
-    fontWeight: 'bold',
     color: 'black',
     paddingVertical: 15,
+    fontFamily: theme.fontFamilyBold,
   },
   moodText: {
     fontSize: 24,
+    fontFamily: theme.fontFamilyBold,
   },
   moodList: {
     flexDirection: 'row',
@@ -89,9 +137,9 @@ const styles = StyleSheet.create({
   },
   descriptionText: {
     color: '#454C73',
-    fontWeight: 'bold',
     fontSize: 10,
     textAlign: 'center',
+    fontFamily: theme.fontFamilyBold,
   },
   button: {
     backgroundColor: '#454C73',
@@ -103,6 +151,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     paddingHorizontal: 40,
     paddingVertical: 10,
-    fontWeight: 'bold',
+    fontFamily: theme.fontFamilyBold,
   },
 });
